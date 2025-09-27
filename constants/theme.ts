@@ -5,25 +5,50 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+// PrizePicks inspired color palette
+const tintColorLight = '#8B5CF6'; // Purple primary
+const tintColorDark = '#A855F7'; // Lighter purple for dark mode
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    text: '#1A1A1A',
+    background: '#FFFFFF',
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    icon: '#6B7280',
+    tabIconDefault: '#9CA3AF',
     tabIconSelected: tintColorLight,
+    // PrizePicks specific colors
+    primary: '#8B5CF6', // Main purple
+    secondary: '#6366F1', // Indigo accent
+    accent: '#EC4899', // Pink accent
+    surface: '#F8FAFC', // Light surface
+    surfaceSecondary: '#F1F5F9', // Secondary surface
+    border: '#E2E8F0',
+    success: '#10B981',
+    warning: '#F59E0B',
+    error: '#EF4444',
+    cardBackground: '#FFFFFF',
+    overlay: 'rgba(0, 0, 0, 0.5)',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: '#F8FAFC',
+    background: '#0F0F23', // Deep purple-black
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    icon: '#9CA3AF',
+    tabIconDefault: '#6B7280',
     tabIconSelected: tintColorDark,
+    // PrizePicks specific colors
+    primary: '#A855F7', // Lighter purple for dark
+    secondary: '#7C3AED', // Dark mode indigo
+    accent: '#F472B6', // Light pink accent
+    surface: '#1E1B3A', // Dark purple surface
+    surfaceSecondary: '#2D1B69', // Darker purple surface
+    border: '#374151',
+    success: '#34D399',
+    warning: '#FBBF24',
+    error: '#F87171',
+    cardBackground: '#1E1B3A',
+    overlay: 'rgba(0, 0, 0, 0.7)',
   },
 };
 

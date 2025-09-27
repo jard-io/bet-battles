@@ -1,98 +1,200 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { ThemedButton } from '@/components/themed-button';
+import { ThemedCard } from '@/components/themed-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <ThemedView style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Hero Section */}
+        <ThemedView style={styles.heroSection}>
+          <ThemedText type="overline" style={styles.overlineText}>
+            WELCOME TO
+          </ThemedText>
+          <ThemedText type="hero" style={styles.heroTitle}>
+            PrizePicks Style
+          </ThemedText>
+          <ThemedText type="body" style={styles.heroSubtitle}>
+            Experience the sleek, modern design inspired by the PrizePicks app
+          </ThemedText>
+        </ThemedView>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        {/* Feature Cards */}
+        <ThemedView style={styles.cardsContainer}>
+          <ThemedCard variant="elevated" style={styles.featureCard}>
+            <ThemedText type="overline" style={styles.cardOverline}>
+              THEME
+            </ThemedText>
+            <ThemedText type="subtitle" style={styles.cardTitle}>
+              Purple & Black Design
+            </ThemedText>
+            <ThemedText type="body" style={styles.cardDescription}>
+              Clean, modern interface with PrizePicks-inspired color palette featuring purple accents and sophisticated gradients.
+            </ThemedText>
+            <ThemedButton 
+              title="Explore Theme" 
+              variant="primary" 
+              size="medium"
+              style={styles.cardButton}
+              onPress={() => alert('Theme explored!')}
+            />
+          </ThemedCard>
+
+          <ThemedCard variant="elevated" style={styles.featureCard}>
+            <ThemedText type="overline" style={styles.cardOverline}>
+              COMPONENTS
+            </ThemedText>
+            <ThemedText type="subtitle" style={styles.cardTitle}>
+              Modern UI Elements
+            </ThemedText>
+            <ThemedText type="body" style={styles.cardDescription}>
+              Beautifully crafted buttons, cards, and typography that match the PrizePicks aesthetic.
+            </ThemedText>
+            <ThemedView style={styles.buttonRow}>
+              <ThemedButton 
+                title="Primary" 
+                variant="primary" 
+                size="small"
+                style={styles.smallButton}
+                onPress={() => alert('Primary button!')}
+              />
+              <ThemedButton 
+                title="Secondary" 
+                variant="secondary" 
+                size="small"
+                style={styles.smallButton}
+                onPress={() => alert('Secondary button!')}
+              />
+              <ThemedButton 
+                title="Outline" 
+                variant="outline" 
+                size="small"
+                style={styles.smallButton}
+                onPress={() => alert('Outline button!')}
+              />
+            </ThemedView>
+          </ThemedCard>
+
+          <ThemedCard variant="outlined" style={styles.featureCard}>
+            <ThemedText type="overline" style={styles.cardOverline}>
+              NAVIGATION
+            </ThemedText>
+            <ThemedText type="subtitle" style={styles.cardTitle}>
+              Seamless Experience
+            </ThemedText>
+            <ThemedText type="body" style={styles.cardDescription}>
+              Smooth navigation with haptic feedback and beautiful transitions.
+            </ThemedText>
+            <Link href="/modal" asChild>
+              <ThemedButton 
+                title="Open Modal" 
+                variant="ghost" 
+                size="medium"
+                style={styles.cardButton}
+              />
+            </Link>
+          </ThemedCard>
+        </ThemedView>
+
+        {/* Action Section */}
+        <ThemedView style={styles.actionSection}>
+          <ThemedText type="title" style={styles.actionTitle}>
+            Ready to Get Started?
+          </ThemedText>
+          <ThemedText type="body" style={styles.actionDescription}>
+            Explore the Explore tab to learn more about what's included in this theme.
+          </ThemedText>
+          <ThemedButton 
+            title="Get Started" 
+            variant="primary" 
+            size="large"
+            style={styles.primaryAction}
+            onPress={() => alert('Let\'s go!')}
+          />
+        </ThemedView>
+      </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  heroSection: {
+    paddingHorizontal: 20,
+    paddingTop: 40,
+    paddingBottom: 32,
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
+  overlineText: {
     marginBottom: 8,
+    opacity: 0.8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  heroTitle: {
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  heroSubtitle: {
+    textAlign: 'center',
+    opacity: 0.8,
+    maxWidth: 300,
+  },
+  cardsContainer: {
+    paddingHorizontal: 20,
+    gap: 16,
+  },
+  featureCard: {
+    marginVertical: 0,
+  },
+  cardOverline: {
+    marginBottom: 8,
+    opacity: 0.7,
+  },
+  cardTitle: {
+    marginBottom: 12,
+  },
+  cardDescription: {
+    marginBottom: 16,
+    opacity: 0.8,
+    lineHeight: 22,
+  },
+  cardButton: {
+    marginTop: 8,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  smallButton: {
+    flex: 1,
+    minWidth: 80,
+  },
+  actionSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 32,
+    alignItems: 'center',
+  },
+  actionTitle: {
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  actionDescription: {
+    textAlign: 'center',
+    marginBottom: 24,
+    opacity: 0.8,
+    maxWidth: 280,
+  },
+  primaryAction: {
+    width: '100%',
+    maxWidth: 280,
   },
 });
