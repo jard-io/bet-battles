@@ -26,8 +26,8 @@ export function ThemedButton({
 }: ThemedButtonProps) {
   const primaryColor = useThemeColor({ light: lightColor, dark: darkColor }, 'primary');
   const secondaryColor = useThemeColor({}, 'secondary');
-  const borderColor = useThemeColor({}, 'border');
-  const backgroundColor = useThemeColor({}, 'background');
+  const disabledColor = useThemeColor({}, 'border');
+  const iconColor = useThemeColor({}, 'icon');
   
   const textColor = useThemeColor(
     { light: textLightColor, dark: textDarkColor }, 
@@ -35,7 +35,7 @@ export function ThemedButton({
   );
 
   const getBackgroundColor = () => {
-    if (disabled) return useThemeColor({}, 'border');
+    if (disabled) return disabledColor;
     
     switch (variant) {
       case 'primary':
@@ -89,7 +89,7 @@ export function ThemedButton({
       <ThemedText 
         type="button" 
         style={[
-          { color: disabled ? useThemeColor({}, 'icon') : textColor },
+          { color: disabled ? iconColor : textColor },
           variant === 'ghost' && { color: primaryColor }
         ]}
       >
