@@ -1,13 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Clipboard, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { Alert, Clipboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedCard } from '@/components/themed-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { logout } from '@/utils/authStorage';
 
 interface CustomBet {
   id: string;
@@ -247,6 +249,22 @@ export default function CustomBetsScreen() {
     }
   };
 
+  const handleSignOut = async () => {
+    if (confirm('Are you sure you want to sign out?')) {
+      try {
+        const success = await logout();
+        if (success) {
+          router.replace('/auth');
+        } else {
+          alert('Failed to sign out. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error during sign out:', error);
+        alert('An error occurred during sign out.');
+      }
+    }
+  };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -279,14 +297,39 @@ export default function CustomBetsScreen() {
   };
 
   return (
+    <View style={{ flex: 1 }}>
+      {/* Sign Out button */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 60,
+          right: 20,
+          zIndex: 10000,
+        }}
+      >
+        <Pressable
+          onPress={handleSignOut}
+          style={{
+            backgroundColor: 'transparent',
+            borderWidth: 1,
+            borderColor: '#8B5CF6',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 6,
+          }}
+        >
+          <Text style={{ color: '#8B5CF6', fontWeight: '500', fontSize: 14 }}>
+            Sign Out
+          </Text>
+        </Pressable>
+      </View>
+
     <ThemedView style={styles.container}>
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
+        {/* Content Header */}
         <ThemedView style={styles.headerSection}>
           <IconSymbol size={48} name="plus.circle.fill" color="#8B5CF6" style={styles.headerIcon} />
-          <ThemedText type="title" style={styles.headerTitle}>
-            Custom Bets
-          </ThemedText>
           <ThemedText type="body" style={styles.headerSubtitle}>
             Create your own bets and challenge friends
           </ThemedText>
@@ -480,12 +523,31 @@ export default function CustomBetsScreen() {
         </ThemedView>
       </ScrollView>
     </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  topHeaderTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  signOutButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   scrollView: {
     flex: 1,

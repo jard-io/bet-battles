@@ -1,14 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedCard } from '@/components/themed-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { getPicksWithOutcomes, getUserStats, simulatePickOutcomes } from '@/utils/authStorage';
+import { getPicksWithOutcomes, getUserStats, logout, simulatePickOutcomes } from '@/utils/authStorage';
 
 interface LeaderboardEntry {
   id: string;
@@ -20,11 +21,14 @@ interface LeaderboardEntry {
   rank: number;
 }
 
+type SortOption = 'winRate' | 'streak' | 'total' | 'totalWins';
+
 export default function LeaderboardScreen() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [userEntry, setUserEntry] = useState<LeaderboardEntry | null>(null);
   const [recentPicks, setRecentPicks] = useState<any[]>([]);
+  const [sortBy, setSortBy] = useState<SortOption>('winRate');
 
   // Fetch real leaderboard data
   const fetchLeaderboardData = async () => {
@@ -59,11 +63,12 @@ export default function LeaderboardScreen() {
           const leaderboardData = await leaderboardResponse.json();
           const userRankData = await userRankResponse.json();
           
-          console.log('Real leaderboard data:', leaderboardData);
-          console.log('Real user rank data:', userRankData);
-          
-          setLeaderboard(leaderboardData.leaderboard || []);
-          setUserEntry(userRankData.userRank || null);
+                console.log('Real leaderboard data:', leaderboardData);
+                console.log('Real user rank data:', userRankData);
+                
+                const sortedLeaderboard = sortLeaderboard(leaderboardData.leaderboard || [], sortBy);
+                setLeaderboard(sortedLeaderboard);
+                setUserEntry(userRankData.userRank || null);
           
           // Get recent picks for display
           const allPicks = await getPicksWithOutcomes();
@@ -131,6 +136,14 @@ export default function LeaderboardScreen() {
     }, [])
   );
 
+  // Re-sort leaderboard when sort option changes
+  useEffect(() => {
+    if (leaderboard.length > 0) {
+      const sortedLeaderboard = sortLeaderboard(leaderboard, sortBy);
+      setLeaderboard(sortedLeaderboard);
+    }
+  }, [sortBy]);
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchLeaderboardData().finally(() => setRefreshing(false));
@@ -153,6 +166,55 @@ export default function LeaderboardScreen() {
     if (streak > 0) return '#10B981'; // Green for winning streak
     if (streak < 0) return '#EF4444'; // Red for losing streak
     return '#6B7280'; // Gray for no streak
+  };
+
+  const sortLeaderboard = (entries: LeaderboardEntry[], sortOption: SortOption): LeaderboardEntry[] => {
+    const sorted = [...entries].sort((a, b) => {
+      switch (sortOption) {
+        case 'winRate':
+          // Sort by win rate (descending), then by wins as tiebreaker
+          if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+          return b.wins - a.wins;
+        case 'streak':
+          // Sort by streak (descending), then by win rate as tiebreaker
+          if (b.streak !== a.streak) return b.streak - a.streak;
+          return b.winRate - a.winRate;
+        case 'total':
+          // Sort by total picks (descending), then by win rate as tiebreaker
+          const totalA = a.wins + a.losses;
+          const totalB = b.wins + b.losses;
+          if (totalB !== totalA) return totalB - totalA;
+          return b.winRate - a.winRate;
+        case 'totalWins':
+          // Sort by total wins (descending), then by win rate as tiebreaker
+          if (b.wins !== a.wins) return b.wins - a.wins;
+          return b.winRate - a.winRate;
+        default:
+          return 0;
+      }
+    });
+
+    // Re-assign ranks based on new sorting
+    return sorted.map((entry, index) => ({
+      ...entry,
+      rank: index + 1
+    }));
+  };
+
+  const handleSignOut = async () => {
+    if (confirm('Are you sure you want to sign out?')) {
+      try {
+        const success = await logout();
+        if (success) {
+          router.replace('/auth');
+        } else {
+          alert('Failed to sign out. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error during sign out:', error);
+        alert('An error occurred during sign out.');
+      }
+    }
   };
 
   const renderLeaderboardEntry = (entry: LeaderboardEntry, isUser: boolean = false) => (
@@ -213,12 +275,49 @@ export default function LeaderboardScreen() {
             {entry.wins + entry.losses}
           </ThemedText>
         </ThemedView>
+
+        <ThemedView style={styles.statItem}>
+          <ThemedText type="body" style={styles.statLabel}>
+            Wins
+          </ThemedText>
+          <ThemedText type="defaultSemiBold" style={styles.statValue}>
+            {entry.wins}
+          </ThemedText>
+        </ThemedView>
       </ThemedView>
     </ThemedCard>
   );
 
   return (
+    <View style={{ flex: 1 }}>
+      {/* Sign Out button */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 60,
+          right: 20,
+          zIndex: 10000,
+        }}
+      >
+        <Pressable
+          onPress={handleSignOut}
+          style={{
+            backgroundColor: 'transparent',
+            borderWidth: 1,
+            borderColor: '#8B5CF6',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 6,
+          }}
+        >
+          <Text style={{ color: '#8B5CF6', fontWeight: '500', fontSize: 14 }}>
+            Sign Out
+          </Text>
+        </Pressable>
+      </View>
+
     <ThemedView style={styles.container}>
+
       <ScrollView 
         style={styles.scrollView} 
         showsVerticalScrollIndicator={false}
@@ -226,15 +325,77 @@ export default function LeaderboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Header */}
+        {/* Content Header */}
         <ThemedView style={styles.headerSection}>
           <IconSymbol size={48} name="trophy.fill" color="#FFD700" style={styles.headerIcon} />
-          <ThemedText type="title" style={styles.headerTitle}>
-            Leaderboard
-          </ThemedText>
           <ThemedText type="body" style={styles.headerSubtitle}>
             Compete with friends and track your pick accuracy
           </ThemedText>
+        </ThemedView>
+
+        {/* Sort Options */}
+        <ThemedView style={styles.sortSection}>
+          <ThemedText type="body" style={styles.sortLabel}>
+            Sort by:
+          </ThemedText>
+          <ThemedView style={styles.sortButtons}>
+            <Pressable
+              onPress={() => setSortBy('winRate')}
+              style={[
+                styles.sortButton,
+                sortBy === 'winRate' && styles.sortButtonActive
+              ]}
+            >
+              <Text style={[
+                styles.sortButtonText,
+                sortBy === 'winRate' && styles.sortButtonTextActive
+              ]}>
+                Win Rate
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setSortBy('streak')}
+              style={[
+                styles.sortButton,
+                sortBy === 'streak' && styles.sortButtonActive
+              ]}
+            >
+              <Text style={[
+                styles.sortButtonText,
+                sortBy === 'streak' && styles.sortButtonTextActive
+              ]}>
+                Streak
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setSortBy('total')}
+              style={[
+                styles.sortButton,
+                sortBy === 'total' && styles.sortButtonActive
+              ]}
+            >
+              <Text style={[
+                styles.sortButtonText,
+                sortBy === 'total' && styles.sortButtonTextActive
+              ]}>
+                Total Picks
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setSortBy('totalWins')}
+              style={[
+                styles.sortButton,
+                sortBy === 'totalWins' && styles.sortButtonActive
+              ]}
+            >
+              <Text style={[
+                styles.sortButtonText,
+                sortBy === 'totalWins' && styles.sortButtonTextActive
+              ]}>
+                Total Wins
+              </Text>
+            </Pressable>
+          </ThemedView>
         </ThemedView>
 
         {/* Your Rank */}
@@ -321,12 +482,31 @@ export default function LeaderboardScreen() {
         </ThemedView>
       </ScrollView>
     </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  topHeaderTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  signOutButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   scrollView: {
     flex: 1,
@@ -348,6 +528,40 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.8,
     maxWidth: 300,
+  },
+  sortSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    alignItems: 'center',
+  },
+  sortLabel: {
+    marginBottom: 12,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  sortButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  sortButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  sortButtonActive: {
+    backgroundColor: '#8B5CF6',
+    borderColor: '#8B5CF6',
+  },
+  sortButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
+  sortButtonTextActive: {
+    color: '#FFFFFF',
   },
   yourRankSection: {
     paddingHorizontal: 20,

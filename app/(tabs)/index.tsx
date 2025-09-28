@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Alert, RefreshControl, ScrollView, StyleSheet } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedCard } from '@/components/themed-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { getPicksFromStorage, savePickToStorage } from '@/utils/authStorage';
+import { getPicksFromStorage, logout, savePickToStorage } from '@/utils/authStorage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 
 interface Projection {
@@ -238,8 +239,53 @@ export default function BoardScreen() {
     }
   };
 
+  const handleSignOut = async () => {
+    if (confirm('Are you sure you want to sign out?')) {
+      try {
+        const success = await logout();
+        if (success) {
+          router.replace('/auth');
+        } else {
+          alert('Failed to sign out. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error during sign out:', error);
+        alert('An error occurred during sign out.');
+      }
+    }
+  };
+
   return (
+    <View style={{ flex: 1 }}>
+      {/* Sign Out button */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 60,
+          right: 20,
+          zIndex: 10000,
+        }}
+      >
+        <Pressable
+          onPress={handleSignOut}
+          style={{
+            backgroundColor: 'transparent',
+            borderWidth: 1,
+            borderColor: '#8B5CF6',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 6,
+          }}
+        >
+          <Text style={{ color: '#8B5CF6', fontWeight: '500', fontSize: 14 }}>
+            Sign Out
+          </Text>
+        </Pressable>
+      </View>
+
     <ThemedView style={styles.container}>
+
+
       <ScrollView 
         style={styles.scrollView} 
         showsVerticalScrollIndicator={false}
@@ -249,9 +295,9 @@ export default function BoardScreen() {
         onScroll={handleScroll}
         scrollEventThrottle={400}
       >
-        {/* Header */}
+        {/* Content Header */}
         <ThemedView style={styles.headerSection}>
-          <ThemedText type="title" style={styles.headerTitle}>
+          <ThemedText type="title" style={styles.contentTitle}>
             Today&apos;s Picks
           </ThemedText>
           <ThemedText type="body" style={styles.headerSubtitle}>
@@ -345,12 +391,31 @@ export default function BoardScreen() {
         )}
       </ScrollView>
     </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  signOutButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   scrollView: {
     flex: 1,
@@ -361,7 +426,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     alignItems: 'center',
   },
-  headerTitle: {
+  contentTitle: {
     textAlign: 'center',
     marginBottom: 8,
   },
