@@ -23,16 +23,16 @@ export const Colors = {
     accent: '#EC4899', // Pink accent
     surface: '#F8FAFC', // Light surface
     surfaceSecondary: '#F1F5F9', // Secondary surface
-    border: '#E2E8F0',
+    border: 'rgba(139, 92, 246, 0.15)',
     success: '#10B981',
     warning: '#F59E0B',
     error: '#EF4444',
-    cardBackground: '#FFFFFF',
+    cardBackground: '#F8FAFC',
     overlay: 'rgba(0, 0, 0, 0.5)',
   },
   dark: {
     text: '#F8FAFC',
-    background: '#0F0F23', // Deep purple-black
+    background: '#0b0b1c', // Deep purple-black
     tint: tintColorDark,
     icon: '#9CA3AF',
     tabIconDefault: '#6B7280',
@@ -43,11 +43,11 @@ export const Colors = {
     accent: '#F472B6', // Light pink accent
     surface: '#1E1B3A', // Dark purple surface
     surfaceSecondary: '#2D1B69', // Darker purple surface
-    border: '#374151',
+    border: 'rgba(168, 85, 247, 0.25)',
     success: '#34D399',
     warning: '#FBBF24',
     error: '#F87171',
-    cardBackground: '#1E1B3A',
+    cardBackground: '#252140',
     overlay: 'rgba(0, 0, 0, 0.7)',
   },
 };

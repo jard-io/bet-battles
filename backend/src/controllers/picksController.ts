@@ -6,7 +6,7 @@ import { simulatePickOutcome } from '../utils/random';
 export const createPick = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
-    const { projectionId, pickType, playerName, statType, lineScore } = req.body;
+    const { projectionId, pickType, playerName, playerImageUrl, statType, lineScore } = req.body;
 
     if (!userId) {
       return res.status(401).json({ message: 'User not authenticated' });
@@ -31,17 +31,17 @@ export const createPick = async (req: AuthRequest, res: Response) => {
       // Update existing pick
       result = await pool.query(`
         UPDATE picks 
-        SET pick_type = $1, player_name = $2, stat_type = $3, line_score = $4
-        WHERE user_id = $5 AND projection_id = $6
+        SET pick_type = $1, player_name = $2, player_image_url = $3, stat_type = $4, line_score = $5
+        WHERE user_id = $6 AND projection_id = $7
         RETURNING *
-      `, [pickType, playerName, statType, lineScore, userId, projectionId]);
+      `, [pickType, playerName, playerImageUrl, statType, lineScore, userId, projectionId]);
     } else {
       // Create new pick
       result = await pool.query(`
-        INSERT INTO picks (user_id, projection_id, pick_type, player_name, stat_type, line_score)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO picks (user_id, projection_id, pick_type, player_name, player_image_url, stat_type, line_score)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
-      `, [userId, projectionId, pickType, playerName, statType, lineScore]);
+      `, [userId, projectionId, pickType, playerName, playerImageUrl, statType, lineScore]);
     }
 
     const pick = result.rows[0];
@@ -53,6 +53,7 @@ export const createPick = async (req: AuthRequest, res: Response) => {
         projectionId: pick.projection_id,
         pickType: pick.pick_type,
         playerName: pick.player_name,
+        playerImageUrl: pick.player_image_url,
         statType: pick.stat_type,
         lineScore: pick.line_score,
         outcome: pick.outcome,
@@ -85,6 +86,7 @@ export const getUserPicks = async (req: AuthRequest, res: Response) => {
       projectionId: pick.projection_id,
       pickType: pick.pick_type,
       playerName: pick.player_name,
+      playerImageUrl: pick.player_image_url,
       statType: pick.stat_type,
       lineScore: pick.line_score,
       outcome: pick.outcome,

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, TextInput } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Platform, StyleSheet, TextInput } from 'react-native';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedCard } from '@/components/themed-card';
@@ -37,10 +37,10 @@ export default function AuthScreen() {
         ? { username, password }
         : { username, email, password };
 
-      console.log('Making auth request to:', `http://localhost:3000${endpoint}`);
+      console.log('Making auth request to:', `http://localhost:3001${endpoint}`);
       console.log('Request body:', body);
 
-      const response = await fetch(`http://localhost:3000${endpoint}`, {
+            const response = await fetch(`http://localhost:3001${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export default function AuthScreen() {
     try {
       // Create a temporary guest user
       const guestUsername = `guest_${Date.now()}`;
-      const response = await fetch('http://localhost:3000/api/auth/guest', {
+      const response = await fetch('http://localhost:3001/api/auth/guest', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,6 +120,14 @@ export default function AuthScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ThemedView style={styles.content}>
+        <ThemedView style={styles.logoContainer}>
+          <Image 
+            source={require('@/assets/images/betbattles-logo.png')} 
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </ThemedView>
+        
         <ThemedText type="title" style={styles.title}>
           {isLogin ? 'Welcome Back!' : 'Create Account'}
         </ThemedText>
@@ -198,6 +206,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logo: {
+    width: 240,
+    height: 240,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
   title: {
     textAlign: 'center',

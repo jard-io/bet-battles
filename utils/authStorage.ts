@@ -6,6 +6,7 @@ export interface StoredPick {
   projectionId: string;
   pickType: 'OVER' | 'UNDER';
   playerName: string;
+  playerImageUrl?: string;
   statType: string;
   lineScore: number;
   timestamp: number;
@@ -21,7 +22,7 @@ export interface UserStats {
   totalPicks: number;
 }
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:3001/api';
 const AUTH_STORAGE_KEY = 'user_auth_token';
 const USER_STORAGE_KEY = 'user_data';
 
@@ -85,6 +86,7 @@ export const savePickToStorage = async (pick: Omit<StoredPick, 'timestamp'>) => 
       projectionId: pick.projectionId,
       pickType: pick.pickType,
       playerName: pick.playerName,
+      playerImageUrl: pick.playerImageUrl,
       statType: pick.statType,
       lineScore: pick.lineScore,
     };
@@ -123,6 +125,7 @@ export const getPicksFromStorage = async (): Promise<StoredPick[]> => {
         projectionId: pick.projectionId,
         pickType: pick.pickType,
         playerName: pick.playerName,
+        playerImageUrl: pick.playerImageUrl,
         statType: pick.statType,
         lineScore: pick.lineScore,
         timestamp: new Date(pick.createdAt).getTime(),

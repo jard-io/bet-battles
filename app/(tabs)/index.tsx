@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedCard } from '@/components/themed-card';
@@ -14,6 +14,7 @@ interface Projection {
   id: string;
   playerId: string;
   playerName: string;
+  playerImageUrl?: string;
   statType: string;
   lineScore: number;
   pick?: 'OVER' | 'UNDER';
@@ -161,6 +162,7 @@ export default function BoardScreen() {
         projectionId: projection.id,
         pickType,
         playerName: projection.playerName,
+        playerImageUrl: projection.playerImageUrl,
         statType: projection.statType,
         lineScore: projection.lineScore,
       });
@@ -256,33 +258,6 @@ export default function BoardScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Sign Out button */}
-      <View
-        style={{
-          position: 'absolute',
-          top: 60,
-          right: 20,
-          zIndex: 10000,
-        }}
-      >
-        <Pressable
-          onPress={handleSignOut}
-          style={{
-            backgroundColor: 'transparent',
-            borderWidth: 1,
-            borderColor: '#8B5CF6',
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            borderRadius: 6,
-          }}
-        >
-          <Text style={{ color: '#8B5CF6', fontWeight: '500', fontSize: 14 }}>
-            Sign Out
-          </Text>
-        </Pressable>
-      </View>
-
     <ThemedView style={styles.container}>
 
 
@@ -295,11 +270,30 @@ export default function BoardScreen() {
         onScroll={handleScroll}
         scrollEventThrottle={400}
       >
-        {/* Content Header */}
-        <ThemedView style={styles.headerSection}>
-          <ThemedText type="title" style={styles.contentTitle}>
-            Today&apos;s Picks
-          </ThemedText>
+                {/* Content Header */}
+                <ThemedView style={styles.headerSection}>
+                  {/* BetBattles Logo - positioned absolutely */}
+                  <View style={styles.logoContainer}>
+                    <Image 
+                      source={require('@/assets/images/betbattles-logo.png')} 
+                      style={styles.logo}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  
+                  {/* Sign Out Button - positioned absolutely */}
+                  <Pressable
+                    onPress={handleSignOut}
+                    style={styles.signOutButton}
+                  >
+                    <Text style={styles.signOutText}>
+                      Sign Out
+                    </Text>
+                  </Pressable>
+                  
+                  <ThemedText type="title" style={styles.contentTitle}>
+                    Today&apos;s Picks
+                  </ThemedText>
           <ThemedText type="body" style={styles.headerSubtitle}>
             {totalItems > 0 ? `${projections.length} of ${totalItems} picks loaded` : 'Choose OVER or UNDER for each player stat'}
           </ThemedText>
@@ -309,7 +303,7 @@ export default function BoardScreen() {
             <ThemedButton
               title={loading ? "Loading..." : "Load Picks"}
               variant="primary"
-              size="medium"
+              size="small"
               style={styles.refreshButton}
               disabled={loading}
               onPress={handleManualRefresh}
@@ -327,23 +321,40 @@ export default function BoardScreen() {
         {/* Projections */}
         <ThemedView style={styles.picksContainer}>
           {projections.map((projection) => (
-            <ThemedCard key={projection.id} variant="elevated" style={styles.pickCard}>
-              <ThemedView style={styles.cardHeader}>
-                <ThemedText type="subtitle" style={styles.playerName}>
-                  {projection.playerName}
-                </ThemedText>
-                <ThemedText type="body" style={styles.statType}>
-                  {projection.statType}
-                </ThemedText>
-              </ThemedView>
-              
-              <ThemedView style={styles.lineContainer}>
-                <ThemedText type="title" style={styles.lineScore}>
-                  {projection.lineScore}
-                </ThemedText>
+            <ThemedCard 
+              key={projection.id} 
+              variant="elevated" 
+              style={[
+                styles.pickCard,
+                projection.pick && styles.pickCardSelected
+              ]}
+            >
+              <ThemedView style={[styles.cardHeader, { backgroundColor: 'transparent' }]}>
+                <ThemedView style={[styles.playerInfo, { backgroundColor: 'transparent' }]}>
+                  {projection.playerImageUrl && (
+                    <Image 
+                      source={{ uri: projection.playerImageUrl }} 
+                      style={styles.playerImage}
+                    />
+                  )}
+                  <ThemedView style={[styles.playerDetails, { backgroundColor: 'transparent' }]}>
+                    <ThemedText type="subtitle" style={styles.playerName}>
+                      {projection.playerName}
+                    </ThemedText>
+                    <ThemedText type="body" style={styles.statType}>
+                      {projection.statType}
+                    </ThemedText>
+                  </ThemedView>
+                </ThemedView>
+                
+                <ThemedView style={[styles.lineContainer, { backgroundColor: 'transparent' }]}>
+                  <ThemedText type="title" style={styles.lineScore}>
+                    {projection.lineScore}
+                  </ThemedText>
+                </ThemedView>
               </ThemedView>
 
-              <ThemedView style={styles.pickButtons}>
+              <ThemedView style={[styles.pickButtons, { backgroundColor: 'transparent' }]}>
                 <ThemedButton
                   title="OVER"
                   variant={projection.pick === 'OVER' ? 'primary' : 'outline'}
@@ -391,7 +402,6 @@ export default function BoardScreen() {
         )}
       </ScrollView>
     </ThemedView>
-    </View>
   );
 }
 
@@ -414,17 +424,43 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   signOutButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    position: 'absolute',
+    top: 10,
+    right: 20,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#8B5CF6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
   },
   scrollView: {
     flex: 1,
   },
   headerSection: {
+    position: 'relative',
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 60,
     paddingBottom: 24,
     alignItems: 'center',
+  },
+  logoContainer: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 1,
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   contentTitle: {
     textAlign: 'center',
@@ -436,12 +472,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   refreshButtonContainer: {
-    width: '100%',
     alignItems: 'center',
   },
   refreshButton: {
-    width: '80%',
-    maxWidth: 200,
+    minWidth: 120,
+    paddingHorizontal: 20,
   },
   loadingContainer: {
     paddingHorizontal: 20,
@@ -456,8 +491,39 @@ const styles = StyleSheet.create({
   pickCard: {
     marginVertical: 0,
   },
+  pickCardSelected: {
+    borderWidth: 2,
+    borderColor: '#8B5CF6',
+    shadowColor: '#8B5CF6',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
   cardHeader: {
-    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  playerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 16,
+  },
+  playerImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+    backgroundColor: '#F3F4F6',
+  },
+  playerDetails: {
+    flex: 1,
   },
   playerName: {
     marginBottom: 4,
@@ -470,7 +536,6 @@ const styles = StyleSheet.create({
   },
   lineContainer: {
     alignItems: 'center',
-    marginVertical: 16,
   },
   lineScore: {
     fontSize: 32,
@@ -511,6 +576,11 @@ const styles = StyleSheet.create({
   endText: {
     textAlign: 'center',
     opacity: 0.7,
+    fontSize: 14,
+  },
+  signOutText: {
+    color: '#8B5CF6',
+    fontWeight: '500',
     fontSize: 14,
   },
 });

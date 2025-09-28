@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedCard } from '@/components/themed-card';
@@ -38,7 +38,7 @@ export default function BetAcceptScreen() {
       throw new Error('User not authenticated');
     }
 
-    const response = await fetch(`http://localhost:3000/api${endpoint}`, {
+    const response = await fetch(`http://localhost:3001/api${endpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -234,10 +234,19 @@ export default function BetAcceptScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedView style={styles.content}>
-        <ThemedView style={styles.header}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <ThemedView style={styles.headerSection}>
+          {/* BetBattles Logo - positioned absolutely */}
+          <View style={styles.logoContainer}>
+            <Image 
+              source={require('@/assets/images/betbattles-logo.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+          
           <IconSymbol size={48} name="target" color="#8B5CF6" style={styles.headerIcon} />
-          <ThemedText type="title" style={styles.headerTitle}>
+          <ThemedText type="title" style={styles.contentTitle}>
             Custom Bet Challenge
           </ThemedText>
           <ThemedText type="body" style={styles.headerSubtitle}>
@@ -245,9 +254,10 @@ export default function BetAcceptScreen() {
           </ThemedText>
         </ThemedView>
 
-        <ThemedCard style={styles.betCard}>
-          <ThemedView style={styles.betHeader}>
-            <ThemedView style={styles.betInfo}>
+        <ThemedView style={styles.content}>
+          <ThemedCard style={styles.betCard}>
+          <ThemedView style={[styles.betHeader, { backgroundColor: 'transparent' }]}>
+            <ThemedView style={[styles.betInfo, { backgroundColor: 'transparent' }]}>
               <ThemedText type="subtitle" style={styles.playerName}>
                 {bet.player}
               </ThemedText>
@@ -259,7 +269,7 @@ export default function BetAcceptScreen() {
               </ThemedText>
             </ThemedView>
 
-            <ThemedView style={styles.statusContainer}>
+            <ThemedView style={[styles.statusContainer, { backgroundColor: 'transparent' }]}>
               <IconSymbol
                 size={20}
                 name={getStatusIcon(bet.status)}
@@ -274,21 +284,14 @@ export default function BetAcceptScreen() {
             </ThemedView>
           </ThemedView>
 
-          <ThemedView style={styles.explanationBox}>
-            <ThemedText type="body" style={styles.explanationText}>
-              💡 {bet.creator} picked {bet.creatorPickType || 'OVER'} {bet.line}. 
-              If you accept, you'll automatically get {bet.creatorPickType === 'OVER' ? 'UNDER' : 'OVER'} {bet.line}.
-              Results are determined randomly with a 1/3 chance each for WIN, LOSS, or TBD.
-            </ThemedText>
-          </ThemedView>
 
           {canAccept && (
-            <ThemedView style={styles.pickDisplayContainer}>
+            <ThemedView style={[styles.pickDisplayContainer, { backgroundColor: 'transparent' }]}>
               <ThemedText type="subtitle" style={styles.pickDisplayTitle}>
                 If you accept this bet:
               </ThemedText>
-              <ThemedView style={styles.pickComparison}>
-                <ThemedView style={styles.pickSide}>
+              <ThemedView style={[styles.pickComparison, { backgroundColor: 'transparent' }]}>
+                <ThemedView style={[styles.pickSide, { backgroundColor: 'transparent' }]}>
                   <ThemedText type="body" style={styles.pickLabel}>
                     {bet.creator} gets:
                   </ThemedText>
@@ -301,7 +304,7 @@ export default function BetAcceptScreen() {
                 
                 <ThemedText type="body" style={styles.vsText}>VS</ThemedText>
                 
-                <ThemedView style={styles.pickSide}>
+                <ThemedView style={[styles.pickSide, { backgroundColor: 'transparent' }]}>
                   <ThemedText type="body" style={styles.pickLabel}>
                     You get:
                   </ThemedText>
@@ -316,7 +319,7 @@ export default function BetAcceptScreen() {
           )}
 
           {bet.outcome && (
-            <ThemedView style={styles.outcomeContainer}>
+            <ThemedView style={[styles.outcomeContainer, { backgroundColor: 'transparent' }]}>
               <ThemedText
                 type="defaultSemiBold"
                 style={[
@@ -330,7 +333,7 @@ export default function BetAcceptScreen() {
           )}
 
           {canAccept && (
-            <ThemedView style={styles.actionButtons}>
+            <ThemedView style={[styles.actionButtons, { backgroundColor: 'transparent' }]}>
               <ThemedButton
                 title={loading ? "Accepting..." : `Accept Bet (${bet.creatorPickType === 'OVER' ? 'UNDER' : 'OVER'})`}
                 variant="primary"
@@ -351,7 +354,7 @@ export default function BetAcceptScreen() {
           )}
 
           {isCreator && (
-            <ThemedView style={styles.creatorMessage}>
+            <ThemedView style={[styles.creatorMessage, { backgroundColor: 'transparent' }]}>
               <ThemedText type="body" style={styles.creatorText}>
                 🎯 This is your bet! Share the link with friends to challenge them.
               </ThemedText>
@@ -373,15 +376,16 @@ export default function BetAcceptScreen() {
               </ThemedText>
             </ThemedView>
           )}
-        </ThemedCard>
+          </ThemedCard>
 
-        <ThemedButton
-          title="View All Custom Bets"
-          variant="ghost"
-          onPress={() => router.push('/(tabs)/custom-bets')}
-          style={styles.viewAllButton}
-        />
-      </ThemedView>
+          <ThemedButton
+            title="View All Custom Bets"
+            variant="ghost"
+            onPress={() => router.push('/(tabs)/custom-bets')}
+            style={styles.viewAllButton}
+          />
+        </ThemedView>
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -390,25 +394,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 60,
   },
-  centerContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  headerSection: {
+    position: 'relative',
     paddingHorizontal: 20,
-  },
-  header: {
+    paddingTop: 70,
+    paddingBottom: 24,
     alignItems: 'center',
-    marginBottom: 32,
+  },
+  logoContainer: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 1,
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   headerIcon: {
     marginBottom: 16,
   },
-  headerTitle: {
+  contentTitle: {
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -416,6 +433,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.8,
     maxWidth: 300,
+  },
+  content: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   icon: {
     marginBottom: 20,
@@ -464,17 +491,6 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: '600',
-  },
-  explanationBox: {
-    backgroundColor: '#F3F4F6',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  explanationText: {
-    fontSize: 14,
-    opacity: 0.8,
-    textAlign: 'center',
   },
   outcomeContainer: {
     marginBottom: 16,

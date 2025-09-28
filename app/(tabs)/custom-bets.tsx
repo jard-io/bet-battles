@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Clipboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Clipboard, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedCard } from '@/components/themed-card';
@@ -39,6 +39,7 @@ export default function CustomBetsScreen() {
   const [customBets, setCustomBets] = useState<CustomBet[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [copiedBetId, setCopiedBetId] = useState<string | null>(null);
 
   // Helper function to make authenticated API calls
   const apiCall = async (endpoint: string, options: RequestInit = {}) => {
@@ -47,7 +48,7 @@ export default function CustomBetsScreen() {
       throw new Error('User not authenticated');
     }
 
-    const response = await fetch(`http://localhost:3000/api${endpoint}`, {
+    const response = await fetch(`http://localhost:3001/api${endpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -205,10 +206,12 @@ export default function CustomBetsScreen() {
     
     try {
       await Clipboard.setString(shareUrl);
-      Alert.alert(
-        'Link Copied! 🔗', 
-        `Bet link copied to clipboard!\n\nShare this link: ${shareUrl}\n\nFriends can tap it to accept your ${bet.player} - ${bet.stat} (${bet.line}) bet!`
-      );
+      setCopiedBetId(bet.id);
+      
+      // Hide the message after 2 seconds
+      setTimeout(() => {
+        setCopiedBetId(null);
+      }, 2000);
     } catch (error) {
       console.error('Error copying to clipboard:', error);
       Alert.alert('Error', 'Failed to copy link to clipboard');
@@ -297,39 +300,34 @@ export default function CustomBetsScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Sign Out button */}
-      <View
-        style={{
-          position: 'absolute',
-          top: 60,
-          right: 20,
-          zIndex: 10000,
-        }}
-      >
-        <Pressable
-          onPress={handleSignOut}
-          style={{
-            backgroundColor: 'transparent',
-            borderWidth: 1,
-            borderColor: '#8B5CF6',
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            borderRadius: 6,
-          }}
-        >
-          <Text style={{ color: '#8B5CF6', fontWeight: '500', fontSize: 14 }}>
-            Sign Out
-          </Text>
-        </Pressable>
-      </View>
-
     <ThemedView style={styles.container}>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Content Header */}
-        <ThemedView style={styles.headerSection}>
-          <IconSymbol size={48} name="plus.circle.fill" color="#8B5CF6" style={styles.headerIcon} />
+              <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+                {/* Content Header */}
+                <ThemedView style={styles.headerSection}>
+                  {/* BetBattles Logo - positioned absolutely */}
+                  <View style={styles.logoContainer}>
+                    <Image 
+                      source={require('@/assets/images/betbattles-logo.png')} 
+                      style={styles.logo}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  
+                  {/* Sign Out Button - positioned absolutely */}
+                  <Pressable
+                    onPress={handleSignOut}
+                    style={styles.signOutButton}
+                  >
+                    <Text style={styles.signOutText}>
+                      Sign Out
+                    </Text>
+                  </Pressable>
+                  
+                  <IconSymbol size={48} name="plus.circle.fill" color="#8B5CF6" style={styles.headerIcon} />
+                  <ThemedText type="title" style={styles.contentTitle}>
+                    Custom Bets
+                  </ThemedText>
           <ThemedText type="body" style={styles.headerSubtitle}>
             Create your own bets and challenge friends
           </ThemedText>
@@ -342,7 +340,7 @@ export default function CustomBetsScreen() {
           </ThemedText>
           
           <ThemedCard variant="elevated" style={styles.formCard}>
-            <ThemedView style={styles.formField}>
+            <ThemedView style={[styles.formField, { backgroundColor: 'transparent' }]}>
               <ThemedText type="body" style={styles.fieldLabel}>
                 Player Name
               </ThemedText>
@@ -355,7 +353,7 @@ export default function CustomBetsScreen() {
               />
             </ThemedView>
 
-            <ThemedView style={styles.formField}>
+            <ThemedView style={[styles.formField, { backgroundColor: 'transparent' }]}>
               <ThemedText type="body" style={styles.fieldLabel}>
                 Stat Type
               </ThemedText>
@@ -368,7 +366,7 @@ export default function CustomBetsScreen() {
               />
             </ThemedView>
 
-            <ThemedView style={styles.formField}>
+            <ThemedView style={[styles.formField, { backgroundColor: 'transparent' }]}>
               <ThemedText type="body" style={styles.fieldLabel}>
                 Line
               </ThemedText>
@@ -382,11 +380,11 @@ export default function CustomBetsScreen() {
               />
             </ThemedView>
 
-            <ThemedView style={styles.formField}>
+            <ThemedView style={[styles.formField, { backgroundColor: 'transparent' }]}>
               <ThemedText type="body" style={styles.fieldLabel}>
                 Your Pick
               </ThemedText>
-              <ThemedView style={styles.pickTypeContainer}>
+              <ThemedView style={[styles.pickTypeContainer, { backgroundColor: 'transparent' }]}>
                 <ThemedButton
                   title="OVER"
                   variant={pickType === 'OVER' ? 'primary' : 'outline'}
@@ -427,8 +425,8 @@ export default function CustomBetsScreen() {
           <ThemedView style={styles.betsContainer}>
             {customBets.map((bet) => (
               <ThemedCard key={bet.id} variant="outlined" style={styles.betCard}>
-                <ThemedView style={styles.betHeader}>
-                  <ThemedView style={styles.betInfo}>
+                <ThemedView style={[styles.betHeader, { backgroundColor: 'transparent' }]}>
+                  <ThemedView style={[styles.betInfo, { backgroundColor: 'transparent' }]}>
                     <ThemedText type="subtitle" style={styles.playerName}>
                       {bet.player}
                     </ThemedText>
@@ -445,7 +443,7 @@ export default function CustomBetsScreen() {
                     )}
                   </ThemedView>
 
-                  <ThemedView style={styles.statusContainer}>
+                  <ThemedView style={[styles.statusContainer, { backgroundColor: 'transparent' }]}>
                     <IconSymbol
                       size={20}
                       name={getStatusIcon(bet.status)}
@@ -461,7 +459,7 @@ export default function CustomBetsScreen() {
                 </ThemedView>
 
                 {(bet.userOutcome || (bet.status === 'ACCEPTED' || bet.status === 'COMPLETED')) && (
-                  <ThemedView style={styles.outcomeContainer}>
+                  <ThemedView style={[styles.outcomeContainer, { backgroundColor: 'transparent' }]}>
                     <ThemedText
                       type="defaultSemiBold"
                       style={[
@@ -478,9 +476,9 @@ export default function CustomBetsScreen() {
                   </ThemedView>
                 )}
 
-                <ThemedView style={styles.betActions}>
+                <ThemedView style={[styles.betActions, { backgroundColor: 'transparent' }]}>
                   {bet.status === 'PENDING' && bet.creatorId !== currentUser?.id && !bet.participants.some(p => p.userId === currentUser?.id) && (
-                    <ThemedView style={styles.actionButtons}>
+                    <ThemedView style={[styles.actionButtons, { backgroundColor: 'transparent' }]}>
                       <ThemedButton
                         title="Accept"
                         variant="primary"
@@ -500,18 +498,19 @@ export default function CustomBetsScreen() {
 
                   {bet.creatorId === currentUser?.id && (
                     <ThemedButton
-                      title="Share This Bet"
-                      variant="outline"
+                      title={copiedBetId === bet.id ? "✅ Link Copied!" : "Share This Bet"}
+                      variant={copiedBetId === bet.id ? "primary" : "outline"}
                       size="small"
                       style={styles.shareButton}
                       onPress={() => shareBet(bet)}
+                      disabled={copiedBetId === bet.id}
                     />
                   )}
 
                 </ThemedView>
 
                 {bet.participants.length > 0 && (
-                  <ThemedView style={styles.participantsContainer}>
+                  <ThemedView style={[styles.participantsContainer, { backgroundColor: 'transparent' }]}>
                     <ThemedText type="body" style={styles.participantsLabel}>
                       Participants: {bet.participants.map(p => p.username || p).join(', ')}
                     </ThemedText>
@@ -523,7 +522,6 @@ export default function CustomBetsScreen() {
         </ThemedView>
       </ScrollView>
     </ThemedView>
-    </View>
   );
 }
 
@@ -553,13 +551,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerSection: {
+    position: 'relative',
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 60,
     paddingBottom: 24,
     alignItems: 'center',
   },
+  logoContainer: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 1,
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
   headerIcon: {
     marginBottom: 16,
+  },
+  contentTitle: {
+    textAlign: 'center',
+    marginBottom: 8,
   },
   headerTitle: {
     textAlign: 'center',
@@ -666,27 +687,31 @@ const styles = StyleSheet.create({
   },
   outcomeContainer: {
     marginBottom: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.2)',
   },
   outcomeText: {
     fontSize: 16,
   },
   betActions: {
-    marginTop: 8,
+    marginTop: 16,
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
+    marginBottom: 8,
   },
   actionButton: {
     flex: 1,
+    minHeight: 40,
   },
   shareButton: {
     width: '100%',
+    minHeight: 40,
   },
   participantsContainer: {
     marginTop: 12,
@@ -697,5 +722,21 @@ const styles = StyleSheet.create({
   participantsLabel: {
     opacity: 0.7,
     fontSize: 12,
+  },
+  signOutButton: {
+    position: 'absolute',
+    top: 10,
+    right: 20,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#8B5CF6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  signOutText: {
+    color: '#8B5CF6',
+    fontWeight: '500',
+    fontSize: 14,
   },
 });

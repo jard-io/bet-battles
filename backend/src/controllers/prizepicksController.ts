@@ -93,11 +93,15 @@ export const getProjections = async (req: AuthRequest, res: Response) => {
     
     // Process the data as you did before
     const players = result.included;
-    const playerMap = new Map<string, string>();
+    const playerMap = new Map<string, { name: string; imageUrl?: string }>();
     
     for (let i = 0; i < players.length; i++) {
       if (players[i]["type"] === "new_player") {
-        playerMap.set(players[i]["id"], players[i]["attributes"]["name"]);
+        const playerData = {
+          name: players[i]["attributes"]["name"],
+          imageUrl: players[i]["attributes"]["image_url"] || players[i]["attributes"]["image"] || null
+        };
+        playerMap.set(players[i]["id"], playerData);
       }
     }
 
@@ -108,14 +112,15 @@ export const getProjections = async (req: AuthRequest, res: Response) => {
     for (let i = 0; i < projectionsData.length; i++) {
       const projection = projectionsData[i];
       const playerId = projection["relationships"]["new_player"]["data"]["id"];
-      const playerName = playerMap.get(playerId) || "Unknown Player";
+      const playerData = playerMap.get(playerId) || { name: "Unknown Player", imageUrl: null };
       const statType = projection["attributes"]["stat_type"];
       const lineScore = projection["attributes"]["line_score"];
 
       processedProjections.push({
         id: projection["id"],
         playerId,
-        playerName,
+        playerName: playerData.name,
+        playerImageUrl: playerData.imageUrl,
         statType,
         lineScore,
       });

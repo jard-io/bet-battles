@@ -33,6 +33,7 @@ export const initDatabase = async () => {
         projection_id VARCHAR(255) NOT NULL,
         pick_type VARCHAR(10) CHECK (pick_type IN ('OVER', 'UNDER')) NOT NULL,
         player_name VARCHAR(255) NOT NULL,
+        player_image_url TEXT,
         stat_type VARCHAR(100) NOT NULL,
         line_score DECIMAL(10,2) NOT NULL,
         outcome VARCHAR(10) CHECK (outcome IN ('WIN', 'LOSS')),
@@ -77,6 +78,12 @@ export const initDatabase = async () => {
     `);
 
     console.log('Database tables initialized successfully');
+    // Add player_image_url column to existing picks table if it doesn't exist
+    await pool.query(`
+      ALTER TABLE picks 
+      ADD COLUMN IF NOT EXISTS player_image_url TEXT
+    `);
+
   } catch (error) {
     console.error('Error initializing database:', error);
     throw error;

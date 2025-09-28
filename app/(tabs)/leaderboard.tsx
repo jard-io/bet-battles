@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedCard } from '@/components/themed-card';
@@ -45,13 +45,13 @@ export default function LeaderboardScreen() {
         }
 
         const [leaderboardResponse, userRankResponse] = await Promise.all([
-          fetch('http://localhost:3000/api/leaderboard', {
+          fetch('http://localhost:3001/api/leaderboard', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
           }),
-          fetch('http://localhost:3000/api/leaderboard/my-rank', {
+          fetch('http://localhost:3001/api/leaderboard/my-rank', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
@@ -223,8 +223,8 @@ export default function LeaderboardScreen() {
       variant={isUser ? "elevated" : "outlined"} 
       style={[styles.entryCard, isUser && styles.userCard]}
     >
-      <ThemedView style={styles.entryHeader}>
-        <ThemedView style={styles.rankContainer}>
+      <ThemedView style={[styles.entryHeader, { backgroundColor: 'transparent' }]}>
+        <ThemedView style={[styles.rankContainer, { backgroundColor: 'transparent' }]}>
           <IconSymbol 
             size={24} 
             name={getRankIcon(entry.rank).name as any} 
@@ -235,7 +235,7 @@ export default function LeaderboardScreen() {
           </ThemedText>
         </ThemedView>
         
-        <ThemedView style={styles.userInfo}>
+        <ThemedView style={[styles.userInfo, { backgroundColor: 'transparent' }]}>
           <ThemedText type="subtitle" style={styles.username}>
             {entry.username} {isUser && '(You)'}
           </ThemedText>
@@ -245,8 +245,8 @@ export default function LeaderboardScreen() {
         </ThemedView>
       </ThemedView>
 
-      <ThemedView style={styles.statsContainer}>
-        <ThemedView style={styles.statItem}>
+      <ThemedView style={[styles.statsContainer, { backgroundColor: 'transparent' }]}>
+        <ThemedView style={[styles.statItem, { backgroundColor: 'transparent' }]}>
           <ThemedText type="body" style={styles.statLabel}>
             Win Rate
           </ThemedText>
@@ -255,7 +255,7 @@ export default function LeaderboardScreen() {
           </ThemedText>
         </ThemedView>
 
-        <ThemedView style={styles.statItem}>
+        <ThemedView style={[styles.statItem, { backgroundColor: 'transparent' }]}>
           <ThemedText type="body" style={styles.statLabel}>
             Streak
           </ThemedText>
@@ -267,7 +267,7 @@ export default function LeaderboardScreen() {
           </ThemedText>
         </ThemedView>
 
-        <ThemedView style={styles.statItem}>
+        <ThemedView style={[styles.statItem, { backgroundColor: 'transparent' }]}>
           <ThemedText type="body" style={styles.statLabel}>
             Total
           </ThemedText>
@@ -276,7 +276,7 @@ export default function LeaderboardScreen() {
           </ThemedText>
         </ThemedView>
 
-        <ThemedView style={styles.statItem}>
+        <ThemedView style={[styles.statItem, { backgroundColor: 'transparent' }]}>
           <ThemedText type="body" style={styles.statLabel}>
             Wins
           </ThemedText>
@@ -289,33 +289,6 @@ export default function LeaderboardScreen() {
   );
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Sign Out button */}
-      <View
-        style={{
-          position: 'absolute',
-          top: 60,
-          right: 20,
-          zIndex: 10000,
-        }}
-      >
-        <Pressable
-          onPress={handleSignOut}
-          style={{
-            backgroundColor: 'transparent',
-            borderWidth: 1,
-            borderColor: '#8B5CF6',
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            borderRadius: 6,
-          }}
-        >
-          <Text style={{ color: '#8B5CF6', fontWeight: '500', fontSize: 14 }}>
-            Sign Out
-          </Text>
-        </Pressable>
-      </View>
-
     <ThemedView style={styles.container}>
 
       <ScrollView 
@@ -325,9 +298,31 @@ export default function LeaderboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Content Header */}
-        <ThemedView style={styles.headerSection}>
-          <IconSymbol size={48} name="trophy.fill" color="#FFD700" style={styles.headerIcon} />
+                {/* Content Header */}
+                <ThemedView style={styles.headerSection}>
+                  {/* BetBattles Logo - positioned absolutely */}
+                  <View style={styles.logoContainer}>
+                    <Image 
+                      source={require('@/assets/images/betbattles-logo.png')} 
+                      style={styles.logo}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  
+                  {/* Sign Out Button - positioned absolutely */}
+                  <Pressable
+                    onPress={handleSignOut}
+                    style={styles.signOutButton}
+                  >
+                    <Text style={styles.signOutText}>
+                      Sign Out
+                    </Text>
+                  </Pressable>
+                  
+                  <IconSymbol size={48} name="trophy.fill" color="#FFD700" style={styles.headerIcon} />
+                  <ThemedText type="title" style={styles.contentTitle}>
+                    Leaderboard
+                  </ThemedText>
           <ThemedText type="body" style={styles.headerSubtitle}>
             Compete with friends and track your pick accuracy
           </ThemedText>
@@ -417,25 +412,37 @@ export default function LeaderboardScreen() {
             <ThemedView style={styles.picksContainer}>
               {recentPicks.map((pick, index) => (
                 <ThemedCard key={index} variant="outlined" style={styles.pickCard}>
-                  <ThemedView style={styles.pickRow}>
-                    <ThemedView style={styles.pickInfo}>
-                      <ThemedView style={styles.pickPlayerRow}>
-                        <ThemedText type="defaultSemiBold" style={styles.pickPlayer}>
-                          {pick.playerName}
-                        </ThemedText>
-                        {pick.isCustomBet && (
-                          <ThemedView style={styles.customBetBadge}>
-                            <ThemedText type="caption" style={styles.customBetText}>
-                              CUSTOM
-                            </ThemedText>
+                  <ThemedView style={[styles.pickRow, { backgroundColor: 'transparent' }]}>
+                    <ThemedView style={[styles.pickInfo, { backgroundColor: 'transparent' }]}>
+                      <ThemedView style={[styles.pickPlayerRow, { backgroundColor: 'transparent' }]}>
+                        {pick.playerImageUrl && (
+                          <ThemedView style={[styles.pickPlayerImageContainer, { backgroundColor: 'transparent' }]}>
+                            <Image 
+                              source={{ uri: pick.playerImageUrl }} 
+                              style={styles.pickPlayerImage}
+                            />
                           </ThemedView>
                         )}
+                        <ThemedView style={[styles.pickPlayerDetails, { backgroundColor: 'transparent' }]}>
+                          <ThemedView style={[styles.pickPlayerNameRow, { backgroundColor: 'transparent' }]}>
+                            <ThemedText type="defaultSemiBold" style={styles.pickPlayer}>
+                              {pick.playerName}
+                            </ThemedText>
+                            {pick.isCustomBet && (
+                              <ThemedView style={styles.customBetBadge}>
+                                <ThemedText type="caption" style={styles.customBetText}>
+                                  CUSTOM
+                                </ThemedText>
+                              </ThemedView>
+                            )}
+                          </ThemedView>
+                          <ThemedText type="body" style={styles.pickDetails}>
+                            {pick.pickType} {pick.lineScore} {pick.statType}
+                          </ThemedText>
+                        </ThemedView>
                       </ThemedView>
-                      <ThemedText type="body" style={styles.pickDetails}>
-                        {pick.pickType} {pick.lineScore} {pick.statType}
-                      </ThemedText>
                     </ThemedView>
-                    <ThemedView style={styles.pickStatus}>
+                    <ThemedView style={[styles.pickStatus, { backgroundColor: 'transparent' }]}>
                       <ThemedText style={[styles.statusIcon, { color: pick.statusColor }]}>
                         {pick.statusIcon}
                       </ThemedText>
@@ -482,7 +489,6 @@ export default function LeaderboardScreen() {
         </ThemedView>
       </ScrollView>
     </ThemedView>
-    </View>
   );
 }
 
@@ -504,21 +510,40 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
-  signOutButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
   scrollView: {
     flex: 1,
   },
   headerSection: {
+    position: 'relative',
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 60,
     paddingBottom: 24,
     alignItems: 'center',
   },
+  logoContainer: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    zIndex: 1,
+  },
+  logo: {
+    width: 60,
+    height: 60,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
   headerIcon: {
     marginBottom: 16,
+  },
+  contentTitle: {
+    textAlign: 'center',
+    marginBottom: 8,
   },
   headerTitle: {
     textAlign: 'center',
@@ -657,6 +682,23 @@ const styles = StyleSheet.create({
   pickPlayerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 2,
+  },
+  pickPlayerImageContainer: {
+    marginRight: 8,
+  },
+  pickPlayerImage: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
+  },
+  pickPlayerDetails: {
+    flex: 1,
+  },
+  pickPlayerNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     marginBottom: 2,
   },
@@ -689,5 +731,21 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     textTransform: 'uppercase',
+  },
+  signOutButton: {
+    position: 'absolute',
+    top: 10,
+    right: 20,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#8B5CF6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  signOutText: {
+    color: '#8B5CF6',
+    fontWeight: '500',
+    fontSize: 14,
   },
 });
